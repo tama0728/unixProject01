@@ -2,6 +2,9 @@
 #include "gameLogic.h"
 
 static GtkApplication *global_app = NULL; // 전역 앱 객체
+static GtkWidget *log_list = NULL; // 로그를 표시할 ListBox
+
+char result[50];
 
 // 팝업 창에서 확인 버튼 이벤트
 static void on_popup_confirm(GtkWidget *button, gpointer entry) {
@@ -42,27 +45,43 @@ void show_popup(GtkApplication *app) {
     gtk_window_present(GTK_WINDOW(popup));
 }
 
+void add_log(const char *input, const char *result) {
+    if (!log_list) return; // log_list가 초기화되지 않았으면 종료
+
+    // 로그 행(Row) 생성
+    GtkWidget *row = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 35);
+
+    // 입력과 결과를 결합한 텍스트
+    char *log_text = g_strconcat(input, ": ", result, NULL);
+    GtkWidget *input_label = gtk_label_new(log_text);
+    g_free(log_text); // 동적 메모리 해제
+
+    // 라벨을 로그 행에 추가
+    gtk_box_append(GTK_BOX(row), input_label);
+
+    // 로그 행을 ListBox에 추가
+    gtk_list_box_append(GTK_LIST_BOX(log_list), row);
+
+    // 화면 갱신: 로그 항목을 보이게 설정
+    gtk_widget_set_visible(row, TRUE);
+}
+
 // 버튼 클릭 이벤트
 static void on_button_clicked(GtkWidget *button, gpointer entry) {
     const char *label = gtk_button_get_label(GTK_BUTTON(button));
     const char *current_text = gtk_editable_get_text(GTK_EDITABLE(entry));
 
-    if (!add_input(current_text, label)) {
-        g_print("중복되었거나 길이를 초과했습니다.\n");
-        return;
-    }
-
-    gtk_editable_set_text(GTK_EDITABLE(entry), get_current_input());
+    add_input(current_text, label, entry);
 
     if (is_game_complete()) {
-        g_print("게임 완료!\n");
-        reset_game();
+        add_log(gtk_editable_get_text(GTK_EDITABLE(entry)), numBaseball());
     }
 }
+
 // Clear 버튼 클릭 이벤트 핸들러
-static void on_clear_button_clicked(gpointer entry) {
-    reset_game(); // 게임 입력 데이터 초기화
-    gtk_editable_set_text(GTK_EDITABLE(entry), ""); // 입력 필드 초기화
+static void on_clear_button_clicked(GtkWidget *button, gpointer data) {
+    gtk_editable_set_text(GTK_EDITABLE(data), ""); // 입력 창 초기화
+    reset_game(); // 게임 로직 초기화
     g_print("입력이 초기화되었습니다.\n");
 }
 
@@ -70,7 +89,7 @@ static void on_clear_button_clicked(gpointer entry) {
 void show_main_window(GtkApplication *app) {
     GtkWidget *window = gtk_application_window_new(app);
     gtk_window_set_title(GTK_WINDOW(window), "숫자 야구 게임");
-    gtk_window_set_default_size(GTK_WINDOW(window), 400, 300);
+    gtk_window_set_default_size(GTK_WINDOW(window), 400, 600);
 
     GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
     gtk_window_set_child(GTK_WINDOW(window), vbox);
@@ -94,10 +113,13 @@ void show_main_window(GtkApplication *app) {
         gtk_grid_attach(GTK_GRID(grid), button, i % 5, i / 5, 1, 1);
     }
 
-    // Clear 버튼 추가
     GtkWidget *clear_button = gtk_button_new_with_label("Clear");
     gtk_box_append(GTK_BOX(vbox), clear_button);
     g_signal_connect(clear_button, "clicked", G_CALLBACK(on_clear_button_clicked), entry);
+
+    // 로그를 표시할 ListBox 추가
+    log_list = gtk_list_box_new();
+    gtk_box_append(GTK_BOX(vbox), log_list);
 
     gtk_window_present(GTK_WINDOW(window));
 }

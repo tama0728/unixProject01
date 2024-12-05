@@ -13,6 +13,6 @@ void show_main_window(GtkApplication *app);
 void show_popup(GtkApplication *app);
 
 // 버튼 클릭 이벤트 핸들러
-static void on_clear_button_clicked(gpointer entry);
+static void on_clear_button_clicked(GtkWidget *button, gpointer entry);
 
 #endif // UI_H
