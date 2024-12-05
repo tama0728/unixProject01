@@ -12,6 +12,6 @@ include_directories(${GTK_INCLUDE_DIRS})
 link_directories(${GTK_LIBRARY_DIRS})
 add_definitions(${GTK_CFLAGS_OTHER})
 
-add_executable(${PROJECT_NAME} main.c)
+add_executable(${PROJECT_NAME} main.c ui.c ui.h gameLogic.c gameLogic.h)
 
 target_link_libraries(${PROJECT_NAME} ${GTK_LIBRARIES})
