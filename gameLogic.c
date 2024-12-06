@@ -36,7 +36,7 @@ int validate_input(const char *input) {
 void add_input(const char *current_text, const char *new_char, gpointer entry) {
     if (strlen(current_text) >= get_string_length()) {
 //        g_print("문자열 길이를 초과했습니다. (입력값: %s)\n", current_text);
-        reset_game();
+        reset_input();
         strncat(input_buffer, new_char, 1);
         gtk_editable_set_text(GTK_EDITABLE(entry), new_char); // 입력 창 초기화
         return;
@@ -75,19 +75,29 @@ const char* numBaseball() {
             }
         }
     }
-    sprintf(result, "Strike: %d, Ball: %d\n", strike, ball);
+    sprintf(result, "Round: %d, Strike: %d, Ball: %d\n", gameCount+1, strike, ball);
     gameCount++;
     if (strike == string_length) {
         printf("You win!\n");
         return "You win!\n";
-    } else if (gameCount == 9) {
-        sprintf(result, "You lose! The answer was %s\n", result);
+    } else if (gameCount == 3) {
+        sprintf(result, "You lose! The answer was %s\n", solution);
+        gameStatus = 1;
+        gameCount = 0;
         return result;
     } else {
         return result;
     }
 }
 
-void reset_game() {
+int get_game_status() {
+    return gameStatus;
+}
+
+void clear_game_status() {
+    gameStatus = 0;
+}
+
+void reset_input() {
     input_buffer[0] = '\0';
 }

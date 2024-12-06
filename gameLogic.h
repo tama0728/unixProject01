@@ -4,6 +4,7 @@
 #include <glib.h>
 
 static char input_buffer[11] = ""; // 최대 길이 10
+static int gameStatus = 0;
 
 // 문자열 길이 설정 및 가져오기
 void set_string_length(int length);
@@ -17,6 +18,8 @@ const char *get_current_input();
 // 게임 상태
 int is_game_complete();
 const char* numBaseball();
-void reset_game();
+void reset_input();
+int get_game_status();
+void clear_game_status();
 
 #endif // GAME_LOGIC_H
