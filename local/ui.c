@@ -204,6 +204,6 @@ void show_main_window(GtkApplication *app) {
 
 // 활성화 이벤트 핸들러
 void on_activate(GtkApplication *app, gpointer user_data) {
-    show_waiting_popup(app);
+    show_length_popup(app);
 }
 
