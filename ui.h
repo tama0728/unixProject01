@@ -20,4 +20,6 @@ void show_length_popup(GtkApplication *app);
 // 버튼 클릭 이벤트 핸들러
 static void on_clear_button_clicked(GtkWidget *button, gpointer entry);
 
+static void on_popup_confirm_with_solution(GtkWidget *button, gpointer entry);
+
 #endif // UI_H
