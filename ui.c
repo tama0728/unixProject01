@@ -71,8 +71,8 @@ static void on_button_clicked(GtkWidget *button, gpointer entry) {
     const char *label = gtk_button_get_label(GTK_BUTTON(button));
     const char *current_text = gtk_editable_get_text(GTK_EDITABLE(entry));
 
-    add_input(current_text, label, entry);
-
+    add_input(current_text, label);
+    gtk_editable_set_text(GTK_EDITABLE(entry), get_current_input()); // 입력 창 초기화
     if (is_game_complete()) {
         add_log(gtk_editable_get_text(GTK_EDITABLE(entry)), numBaseball());
     }
