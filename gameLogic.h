@@ -7,8 +7,10 @@ static char input_buffer[11] = ""; // 최대 길이 10
 static int gameStatus = 0;
 
 // 문자열 길이 설정 및 가져오기
+void set_solution(const char *input);
 void set_string_length(int length);
 int get_string_length();
+void set_input(const char *input);
 
 // 입력 검증 및 추가
 int validate_input(const char *input);

@@ -4,6 +4,8 @@
 #include <gtk/gtk.h>
 #include <gio/gio.h>
 #include <glib.h>
+#include <arpa/inet.h>
+#include <sys/socket.h>
 
 static GSocketService *socket_service = NULL;
 // 애플리케이션 활성화 함수

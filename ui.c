@@ -2,8 +2,8 @@
 #include "gameLogic.h"
 
 static GtkApplication *global_app = NULL; // 전역 앱 객체
-static GtkApplication *length_app = NULL; // 길이 입력 앱 객체
 static GtkWidget *log_list = NULL; // 로그를 표시할 ListBox
+GtkWidget *window = NULL;       // 메인 창
 
 char result[50];
 
@@ -11,9 +11,10 @@ char result[50];
 static gboolean on_client_connected(GSocketService *service, GSocketConnection *connection, GObject *source_object, gpointer user_data) {
     g_print("클라이언트가 연결되었습니다!\n");
 
+    // 연결 후 대기 팝업을 닫고 길이 입력 팝업으로 이동
     GtkWidget *popup = GTK_WIDGET(user_data);
     gtk_window_destroy(GTK_WINDOW(popup)); // 대기 팝업 창 닫기
-    show_length_popup(global_app);          // 메인 창 표시
+    show_length_popup(global_app);          // 길이 입력 팝업 표시
 
     return TRUE; // 연결 이벤트 유지
 }
@@ -33,59 +34,62 @@ void show_waiting_popup(GtkApplication *app) {
     GtkWidget *label = gtk_label_new("Waiting for Client...");
     gtk_box_append(GTK_BOX(vbox), label);
 
-    gtk_window_present(GTK_WINDOW(popup));
+    gtk_window_present(GTK_WINDOW(popup));  // 대기 창 표시
 
     // 소켓 서버 설정
+    GSocketService *socket_service = g_socket_service_new();
     GError *error = NULL;
-    socket_service = g_socket_service_new();
 
+    // 소켓 서버 설정 (포트 12345)
     if (!g_socket_listener_add_inet_port(G_SOCKET_LISTENER(socket_service), 12345, NULL, &error)) {
         g_printerr("소켓 열기 실패: %s\n", error->message);
         g_error_free(error);
         return;
     }
 
+    // 연결을 기다리며, 클라이언트 연결 시 호출되는 핸들러 설정
     g_signal_connect(socket_service, "incoming", G_CALLBACK(on_client_connected), popup);
 
-    g_print("클라이언트 연결을 기다립니다...\n");
-    g_socket_service_start(socket_service); // 서비스 시작
+    g_print("클라이언트 연결 대기 중...\n");
+    g_socket_service_start(socket_service); // 소켓 서비스 시작
 }
 
 // 팝업 창에서 확인 버튼 이벤트
-static void on_popup_confirm(GtkWidget *button, gpointer entry) {
-    const char *input = gtk_editable_get_text(GTK_EDITABLE(entry));
-    int string_length = validate_input(input);
+static void on_popup_confirm_with_solution(GtkWidget *button, gpointer entry) {
+    const char *solution_input = gtk_editable_get_text(GTK_EDITABLE(entry));
 
-    if (string_length > 0) {
-        set_string_length(string_length); // 게임 로직에 문자열 길이 설정
-        gtk_window_destroy(GTK_WINDOW(gtk_widget_get_root(button))); // 팝업 창 닫기
-        show_main_window(global_app); // 메인 창 표시
+    if (strlen(solution_input) > 0) {
+        // 정답을 solution 변수에 저장
+        set_solution(solution_input);
+
+        gtk_window_destroy(GTK_WINDOW(gtk_widget_get_root(button)));  // 팝업 창 닫기
+        show_main_window(global_app);  // 메인 창 표시
     } else {
-        g_print("유효하지 않은 입력입니다.\n");
+        g_print("정답을 입력하세요.\n");
     }
 }
 
-// 길이 입력 팝업 창 표시
+// 정답 입력 팝업 창 표시
 void show_length_popup(GtkApplication *app) {
     global_app = app;
     GtkWidget *popup = gtk_application_window_new(app);
-    gtk_window_set_title(GTK_WINDOW(popup), "Select String Length");
-    gtk_window_set_default_size(GTK_WINDOW(popup), 300, 150);
+    gtk_window_set_title(GTK_WINDOW(popup), "Set Solution");
+    gtk_window_set_default_size(GTK_WINDOW(popup), 400, 150);
 
     GtkWidget *vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
     gtk_window_set_child(GTK_WINDOW(popup), vbox);
 
-    GtkWidget *label = gtk_label_new("Enter the maximum string length:");
+    GtkWidget *label = gtk_label_new("Enter the solution:");
     gtk_box_append(GTK_BOX(vbox), label);
 
     GtkWidget *entry = gtk_entry_new();
-    gtk_entry_set_placeholder_text(GTK_ENTRY(entry), "e.g., 5");
+    gtk_entry_set_placeholder_text(GTK_ENTRY(entry), "e.g., 64382");
     gtk_box_append(GTK_BOX(vbox), entry);
 
-    GtkWidget *button = gtk_button_new_with_label("Confirm");
-    gtk_box_append(GTK_BOX(vbox), button);
+    GtkWidget *confirm_button = gtk_button_new_with_label("Confirm");
+    gtk_box_append(GTK_BOX(vbox), confirm_button);
 
-    g_signal_connect(button, "clicked", G_CALLBACK(on_popup_confirm), entry);
+    g_signal_connect(confirm_button, "clicked", G_CALLBACK(on_popup_confirm_with_solution), entry);
 
     gtk_window_present(GTK_WINDOW(popup));
 }
@@ -129,8 +133,11 @@ void clear_logs() {
 // 게임 로직 초기화
 void reset_game() {
     clear_logs(); // 게임 로그 초기화
-//    set_string_length(0); // 문자열 길이 초기화
+    gtk_window_destroy(window); // 로그 창 닫기
+//    set_solution(""); // 정답 초기화
 //    set_input(""); // 입력 초기화
+    reset_input();
+    show_length_popup(global_app);          // 길이 입력 팝업 표시
 }
 
 // 버튼 클릭 이벤트
@@ -152,13 +159,12 @@ static void on_button_clicked(GtkWidget *button, gpointer entry) {
 // Clear 버튼 클릭 이벤트 핸들러
 static void on_clear_button_clicked(GtkWidget *button, gpointer data) {
     gtk_editable_set_text(GTK_EDITABLE(data), ""); // 입력 창 초기화
-    reset_game(); // 게임 로직 초기화
-    g_print("입력이 초기화되었습니다.\n");
+    set_input("");
 }
 
 // 메인 창 표시
 void show_main_window(GtkApplication *app) {
-    GtkWidget *window = gtk_application_window_new(app);
+    window = gtk_application_window_new(app);
     gtk_window_set_title(GTK_WINDOW(window), "숫자 야구 게임");
     gtk_window_set_default_size(GTK_WINDOW(window), 400, 600);
 
@@ -200,3 +206,4 @@ void show_main_window(GtkApplication *app) {
 void on_activate(GtkApplication *app, gpointer user_data) {
     show_waiting_popup(app);
 }
+
