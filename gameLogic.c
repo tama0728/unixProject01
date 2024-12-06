@@ -5,12 +5,17 @@
 #include <gtk/gtk.h>
 
 static int string_length = 0;
-static char solution[11] = "64382";
+static char solution[11] = "";
 static char result[50];
 static int gameCount = 0;
 
 void set_string_length(int length) {
     string_length = length;
+}
+
+void set_solution(const char *input) {
+    strcpy(solution, input);
+    set_string_length(strlen(input));
 }
 
 int get_string_length() {
@@ -79,6 +84,8 @@ const char* numBaseball() {
     gameCount++;
     if (strike == string_length) {
         printf("You win!\n");
+        gameStatus = 1;
+        gameCount = 0;
         return "You win!\n";
     } else if (gameCount == 3) {
         sprintf(result, "You lose! The answer was %s\n", solution);

@@ -3,7 +3,7 @@
 ## 1. GTK 설치
    GTK를 사용하려면 먼저 시스템에 설치해야 합니다.
 
-#### Linux (Ubuntu 기준)
+#### Linux (Ubuntu LTS (22.04) 이상 기준)
 ```bash
 sudo apt update
 sudo apt install libgtk-4-dev
