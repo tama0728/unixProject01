@@ -37,8 +37,8 @@ make
 
 ## 3. 실행
 ```bash
-./server/build/server
+./Server
 ```
 ```bash
-./client/build/client
+./Client
 ```
