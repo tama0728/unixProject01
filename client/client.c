@@ -209,7 +209,7 @@ int main(int argc, char *argv[]) {
     printf("Solution length: %s\n", buf);
     set_string_length(atoi(buf));
 
-    GtkApplication *app = gtk_application_new("com.example.numberbaseball", G_APPLICATION_DEFAULT_FLAGS);
+    GtkApplication *app = gtk_application_new("com.example.numberbaseball", 0);
 
     g_signal_connect(app, "activate", G_CALLBACK(on_activate), NULL);
     g_application_run(G_APPLICATION(app), argc, argv);
