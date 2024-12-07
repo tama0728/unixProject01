@@ -15,7 +15,19 @@ brew install gtk4
 ```
 
 ## 2. 빌드 및 실행
+### Server 빌드
 ```bash
+cd server
+rm -rf build
+mkdir build
+cd build
+cmake ..
+make
+```
+
+### Client 빌드
+```bash
+cd client
 rm -rf build
 mkdir build
 cd build
@@ -25,5 +37,8 @@ make
 
 ## 3. 실행
 ```bash
-./unixProject01
+./server/build/server
+```
+```bash
+./client/build/client
 ```
