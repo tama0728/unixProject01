@@ -32,39 +32,19 @@ void add_log(const char *input, const char *result) {
     gtk_widget_set_visible(row, TRUE);
 }
 
-// 버튼 클릭 이벤트
-static void on_button_clicked(GtkWidget *button, gpointer entry) {
-    const char *label = gtk_button_get_label(GTK_BUTTON(button));
-    const char *current_text = gtk_editable_get_text(GTK_EDITABLE(entry));
-
-    add_input(current_text, label);
-    gtk_editable_set_text(GTK_EDITABLE(entry), get_current_input()); // 입력 창 초기화
-    if (is_game_complete()) {
-        add_log(gtk_editable_get_text(GTK_EDITABLE(entry)), numBaseball());
-    }
-}
-
-// Clear 버튼 클릭 이벤트 핸들러
-static void on_clear_button_clicked(GtkWidget *button, gpointer data) {
-    gtk_editable_set_text(GTK_EDITABLE(data), ""); // 입력 창 초기화
-    reset_game(); // 게임 로직 초기화
-    g_print("입력이 초기화되었습니다.\n");
-}
-
 void game_start() {
     while (1) {
         int bytes_read = read(ns, buf, sizeof(buf));
         if (bytes_read == -1) {
-//        sleep(1);
             return;
         } else {
 
             buf[bytes_read] = '\0'; // 받은 데이터를 문자열로 처리
 
-//            printf("Received from client: %s\n", buf);
-
-            if (strcmp(buf, "exit") == 0) {
-                return;
+            if (buf[0] == 'Q') {
+                close(ns);
+                close(sd);
+                exit(0);
             }
 
             // 게임 로직 처리
@@ -78,7 +58,6 @@ void game_start() {
 
             // 게임 종료 조건
             if (get_game_status()) {
-//            get_solution();
                 reset_game();
                 clear_game_status();
             }
@@ -181,19 +160,6 @@ void show_popup(GtkApplication *app) {
 void on_activate(GtkApplication *app, gpointer user_data) {
     show_popup(app);
     gtk_window_present(GTK_WINDOW(popup));
-}
-
-void get_solution() {
-    // 정답 입력
-    printf("Enter the solution: ");
-    fgets(solution, sizeof(solution), stdin);
-    solution[strcspn(solution, "\n")] = '\0'; // 입력 끝의 개행 문자 제거
-    set_solution(solution);
-
-    // client에게 정답 길이 전송
-    char length[2];
-    sprintf(length, "%ld", strlen(solution));
-    write(ns, length, strlen(length));
 }
 
 int main(int argc, char *argv[]) {

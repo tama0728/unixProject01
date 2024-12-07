@@ -80,19 +80,6 @@ void reset_game() {
         g_printerr("Game thread creation failed\n");
         return;
     }
-//    // 정답 길이 read
-//    if (read(sd, buf, sizeof(buf)) == -1) {
-//        perror("read");
-//        exit(1);
-//    }
-//
-//    buf[strcspn(buf, "\n")] = '\0'; // 입력 끝의 개행 문자 제거
-//    printf("Solution length: %s\n", buf);
-//    set_string_length(atoi(buf));
-//
-//    char length[2];
-//    sprintf(length, "%d", get_string_length());
-//    add_log("length: ", length);
 }
 
 // 버튼 클릭 이벤트
@@ -135,6 +122,14 @@ static void on_clear_button_clicked(GtkWidget *button, gpointer data) {
     g_print("입력이 초기화되었습니다.\n");
 }
 
+// Quit 버튼 클릭 이벤트 핸들러
+static void on_quit_button_clicked(GtkWidget *button, gpointer data) {
+    gtk_window_destroy(GTK_WINDOW(window)); // 메인 창 닫기
+    write(sd, "Q", 2); // 서버에 종료 메시지 전송
+    close(sd); // 소켓 닫기
+    exit(0);
+}
+
 // 메인 창 표시
 void show_main_window(GtkApplication *app) {
     window = gtk_application_window_new(app);
@@ -166,6 +161,10 @@ void show_main_window(GtkApplication *app) {
     GtkWidget *clear_button = gtk_button_new_with_label("Clear");
     gtk_box_append(GTK_BOX(vbox), clear_button);
     g_signal_connect(clear_button, "clicked", G_CALLBACK(on_clear_button_clicked), entry);
+
+    GtkWidget *quit_button = gtk_button_new_with_label("Quit");
+    gtk_box_append(GTK_BOX(vbox), quit_button);
+    g_signal_connect(quit_button, "clicked", G_CALLBACK(on_quit_button_clicked), entry);
 
     // 로그를 표시할 ListBox 추가
     log_list = gtk_list_box_new();

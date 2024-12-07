@@ -1,8 +1,6 @@
 #include "gameLogic.h"
 #include <string.h>
-#include <stdlib.h>
 #include <stdio.h>
-//#include <gtk/gtk.h>
 #include <ctype.h>
 
 static char input_buffer[11] = ""; // 최대 길이 10
@@ -14,14 +12,6 @@ static int gameStatus = 0;
 
 void set_string_length(int length) {
     string_length = length;
-}
-
-int get_string_length() {
-    return string_length;
-}
-
-const char *get_current_input() {
-    return input_buffer;
 }
 
 void set_solution(const char *input) {
@@ -48,30 +38,6 @@ int validate_input(const char *input) {
         if (!isdigit(input[i])) return 0;
     }
     return (i > 0 && i < 10) ? 1 : 0;
-}
-
-void add_input(const char *current_text, const char *new_char) {
-    if (strlen(current_text) >= get_string_length()) {
-//        g_print("문자열 길이를 초과했습니다. (입력값: %s)\n", current_text);
-        reset_game();
-        strncat(input_buffer, new_char, 1);
-//        gtk_editable_set_text(GTK_EDITABLE(entry), new_char); // 입력 창 초기화
-        return;
-    }
-
-    for (int i = 0; current_text[i] != '\0'; ++i) {
-        if (current_text[i] == new_char[0]) {
-            printf("중복된 숫자입니다. (입력값: %s, 중복된 숫자: %c)\n", current_text, new_char[0]);
-            return;
-        }
-    }
-
-    strncat(input_buffer, new_char, 1);
-//    gtk_editable_set_text(GTK_EDITABLE(entry), input_buffer); // 입력 창 초기화
-}
-
-int is_game_complete() {
-    return strlen(input_buffer) == string_length;
 }
 
 const char* numBaseball() {
