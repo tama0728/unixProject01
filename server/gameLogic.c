@@ -36,6 +36,12 @@ int validate_input(const char *input) {
     int i;
     for (i = 0; input[i] != '\0'; ++i) {
         if (!isdigit(input[i])) return 0;
+        // 중복된 숫자가 있는지 검사
+        for (int j = i+1; input[j] != '\0'; ++j) {
+            if (input[i] == input[j]) {
+                return 0;
+            }
+        }
     }
     return (i > 0 && i < 10) ? 1 : 0;
 }
@@ -46,7 +52,7 @@ const char* numBaseball() {
     if (strlen(input_buffer) != string_length) {
         return 0;
     }
-
+    // 스트라이크와 볼 계산
     for (int i = 0; i < string_length; ++i) {
         for (int j = 0; j < string_length; ++j) {
             if (solution[i] == input_buffer[j]) {
@@ -60,11 +66,14 @@ const char* numBaseball() {
     }
     sprintf(result, "%d: Strike: %d, Ball: %d\n", gameCount+1, strike, ball);
     gameCount++;
+    // 스트라이크가 정답과 길이가 같으면 승리
     if (strike == string_length) {
         printf("You win!\n");
         gameStatus = 1;
         return "You win!\n";
-    } else if (gameCount >= 9) {
+    }
+    // 9번째 시도까지 했는데도 승리하지 못하면 패배
+    else if (gameCount >= 9) {
         sprintf(result, "You lose! The answer was %s\n", solution);
         gameStatus = 1;
         return result;

@@ -5,12 +5,8 @@
 
 int sd;
 char buf[256];
-char solution[11];
-static GtkApplication *global_app = NULL; // 전역 앱 객체
 static GtkWidget *log_list = NULL; // 로그를 표시할 ListBox
-static GtkWidget *popup = NULL; // 팝업 창
 static GtkWidget *window = NULL; // 메인 창
-static gpointer global_entry = NULL; // 입력 창
 
 void clear_log() {
     if (!log_list) return; // log_list가 초기화되지 않았으면 종료
@@ -47,7 +43,7 @@ void add_log(const char *input, const char *result) {
     gtk_widget_set_visible(row, TRUE);
 }
 
-void get_length() {
+void restart() {
     // 정답 길이 read
     if (read(sd, buf, sizeof(buf)) == -1) {
         perror("read");
@@ -65,18 +61,15 @@ void get_length() {
 }
 
 // 비동기적으로 실행할 함수
-void *game_start_thread(void *data) {
-    get_length(); // 이 함수는 게임 시작 로직을 처리
+void *game_restart_thread(void *data) {
+    restart(); // 이 함수는 게임 시작 로직을 처리
     return NULL;
 }
 
 // 게임 로직 초기화
 void reset_game() {
-//    reset_input();
-//    gtk_editable_set_text(GTK_EDITABLE(global_entry), ""); // 입력 창 초기화
-
     pthread_t game_thread;
-    if (pthread_create(&game_thread, NULL, game_start_thread, NULL) != 0) {
+    if (pthread_create(&game_thread, NULL, game_restart_thread, NULL) != 0) {
         g_printerr("Game thread creation failed\n");
         return;
     }
@@ -91,7 +84,6 @@ static void on_button_clicked(GtkWidget *button, gpointer entry) {
         reset_game();
     }
 
-    global_entry = entry;
     add_input(current_text, label);
     gtk_editable_set_text(GTK_EDITABLE(entry), get_current_input()); // 입력 창 초기화
     if (is_game_complete()) {
@@ -149,6 +141,7 @@ void show_main_window(GtkApplication *app) {
     GtkWidget *grid = gtk_grid_new();
     gtk_box_append(GTK_BOX(vbox), grid);
 
+    // 숫자 버튼 생성
     for (int i = 0; i < 10; i++) {
         char label_text[2];
         snprintf(label_text, sizeof(label_text), "%d", i);
@@ -170,6 +163,7 @@ void show_main_window(GtkApplication *app) {
     log_list = gtk_list_box_new();
     gtk_box_append(GTK_BOX(vbox), log_list);
 
+    // 정답 길이 출력
     char length[2];
     sprintf(length, "%d", get_string_length());
     add_log("length: ", length);

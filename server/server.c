@@ -32,6 +32,7 @@ void add_log(const char *input, const char *result) {
     gtk_widget_set_visible(row, TRUE);
 }
 
+// 게임 시작 함수
 void game_start() {
     while (1) {
         int bytes_read = read(ns, buf, sizeof(buf));
@@ -40,7 +41,7 @@ void game_start() {
         } else {
 
             buf[bytes_read] = '\0'; // 받은 데이터를 문자열로 처리
-
+            // 종료 메시지 처리
             if (buf[0] == 'Q') {
                 close(ns);
                 close(sd);
@@ -152,8 +153,6 @@ void show_popup(GtkApplication *app) {
     gtk_box_append(GTK_BOX(vbox), button);
 
     g_signal_connect(button, "clicked", G_CALLBACK(on_popup_confirm), entry);
-
-//    gtk_window_present(GTK_WINDOW(popup));
 }
 
 // 활성화 이벤트 핸들러
