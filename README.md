@@ -6,7 +6,7 @@
 #### Linux (Ubuntu LTS (22.04) 이상 기준)
 ```bash
 sudo apt update
-sudo apt install libgtk-4-dev
+sudo apt install libgtk-4-dev -y
 ```
 ### macOS
 Homebrew를 사용해 설치할 수 있습니다:
